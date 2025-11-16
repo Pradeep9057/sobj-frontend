@@ -9,7 +9,7 @@ export default function FeaturedGrid() {
   const [products, setProducts] = useState([])
   const [quickViewProduct, setQuickViewProduct] = useState(null)
   const [showQuickView, setShowQuickView] = useState(false)
-  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
 
   useEffect(() => {
     async function load() {

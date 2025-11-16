@@ -44,7 +44,7 @@ function Navbar() {
   }, [])
 
   async function handleLogout() {
-    const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+    const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
     try {
       await axios.post(`${base}/api/auth/logout`, {}, { withCredentials: true })
     } catch {}
