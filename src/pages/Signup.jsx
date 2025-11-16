@@ -16,7 +16,7 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     try {
-      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+      const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
       await axios.post(`${base}/api/auth/register`, { name, email, password }, { withCredentials: true })
       setMsg('Registered! Please enter the OTP sent to your email')
       setStep('otp')

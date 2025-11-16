@@ -15,7 +15,7 @@ export default function Login() {
   async function onSubmit(e) {
     e.preventDefault()
     try {
-      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+      const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
       const r = await axios.post(`${base}/api/auth/login`, { email, password }, { withCredentials: true })
       if (r.data?.otp_sent) {
         setStep('otp')

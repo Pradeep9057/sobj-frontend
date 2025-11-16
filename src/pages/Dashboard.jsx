@@ -3,7 +3,7 @@ import axios from 'axios'
 import { User, Mail, Shield, Calendar, ShoppingBag, Heart, MapPin, KeyRound, Sparkles } from 'lucide-react'
 
 export default function Dashboard() {
-  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
   const [tab, setTab] = useState('profile')
   const [profile, setProfile] = useState(null)
   const [orders, setOrders] = useState([])

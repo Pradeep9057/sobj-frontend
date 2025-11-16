@@ -16,7 +16,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true)
   const { add } = useCart()
   const { user } = useAuth()
-  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE// || 'http://localhost:5000'
 
   useEffect(() => {
     async function loadProduct() {

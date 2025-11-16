@@ -26,7 +26,7 @@ import {
 import ImageManager from '../components/ImageManager.jsx'
 
 export default function Admin() {
-  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
   const [activeTab, setActiveTab] = useState('products')
   const [products, setProducts] = useState([])
   const [metalPrices, setMetalPrices] = useState([])
