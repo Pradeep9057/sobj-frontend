@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink, useNavigate } from 'react-router-dom'
+import { Routes, Route, NavLink, useNavigate, Navigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 import { User, LogOut, ShoppingBag, Heart, MapPin, KeyRound, ChevronDown, Shield } from 'lucide-react'
 import { useAuth } from './state/AuthContext.jsx'
