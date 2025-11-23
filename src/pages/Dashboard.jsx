@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
+import axiosInstance from '../utils/axios.js'
 import { User, Mail, Shield, Calendar, ShoppingBag, Heart, MapPin, KeyRound, Sparkles } from 'lucide-react'
 
 export default function Dashboard() {
@@ -22,33 +22,41 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    axios.get(`${base}/api/user/me`, { withCredentials: true }).then(r => setProfile(r.data))
-    axios.get(`${base}/api/user/me/orders`, { withCredentials: true }).then(r => setOrders(r.data))
-    axios.get(`${base}/api/user/me/wishlist`, { withCredentials: true }).then(r => setWishlist(r.data))
-    axios.get(`${base}/api/user/me/addresses`, { withCredentials: true }).then(r => setAddresses(r.data))
-  }, [])
+    axiosInstance.get(`${base}/api/user/me`).then(r => setProfile(r.data)).catch(err => console.error('Profile error:', err))
+    axiosInstance.get(`${base}/api/user/me/orders`).then(r => setOrders(r.data)).catch(err => console.error('Orders error:', err))
+    axiosInstance.get(`${base}/api/user/me/wishlist`).then(r => setWishlist(r.data)).catch(err => console.error('Wishlist error:', err))
+    axiosInstance.get(`${base}/api/user/me/addresses`).then(r => setAddresses(r.data)).catch(err => console.error('Addresses error:', err))
+    
+    // Check for order success message
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('success') === 'true' && params.get('order')) {
+      alert(`Order #${params.get('order')} placed successfully!`)
+      // Clean URL
+      window.history.replaceState({}, '', '/dashboard')
+    }
+  }, [base])
 
   function removeFromWishlist(id) {
-    axios.delete(`${base}/api/user/me/wishlist/${id}`, { withCredentials: true }).then(() => {
+    axiosInstance.delete(`${base}/api/user/me/wishlist/${id}`).then(() => {
       setWishlist(wishlist.filter(w => w.product_id !== Number(id)))
-    })
+    }).catch(err => alert(err?.response?.data?.message || 'Failed to remove'))
   }
 
   function saveAddress(e) {
     e.preventDefault()
-    axios.post(`${base}/api/user/me/addresses`, addrForm, { withCredentials: true }).then(() => {
+    axiosInstance.post(`${base}/api/user/me/addresses`, addrForm).then(() => {
       setAddrForm({ full_name: '', phone: '', line1: '', line2: '', city: '', state: '', postal_code: '', country: 'India', is_default: false })
-      return axios.get(`${base}/api/user/me/addresses`, { withCredentials: true })
-    }).then(r => setAddresses(r.data))
+      return axiosInstance.get(`${base}/api/user/me/addresses`)
+    }).then(r => setAddresses(r.data)).catch(err => alert(err?.response?.data?.message || 'Failed to save address'))
   }
 
   function deleteAddress(id) {
-    axios.delete(`${base}/api/user/me/addresses/${id}`, { withCredentials: true }).then(() => setAddresses(addresses.filter(a => a.id !== id)))
+    axiosInstance.delete(`${base}/api/user/me/addresses/${id}`).then(() => setAddresses(addresses.filter(a => a.id !== id))).catch(err => alert(err?.response?.data?.message || 'Failed to delete'))
   }
 
   function changePassword(e) {
     e.preventDefault()
-    axios.post(`${base}/api/user/me/change-password`, pw, { withCredentials: true }).then(() => {
+    axiosInstance.post(`${base}/api/user/me/change-password`, pw).then(() => {
       alert('Password changed')
       setPw({ oldPassword: '', newPassword: '' })
     }).catch(err => alert(err?.response?.data?.message || 'Failed'))
@@ -239,18 +247,81 @@ export default function Dashboard() {
       )}
 
       {tab === 'orders' && (
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="space-y-4">
           {orders.map(o => (
-            <div key={o.id} className="rounded-xl overflow-hidden bg-white/5">
-              <img src={o.image_url || 'https://placehold.co/600x600'} className="w-full aspect-video object-cover" />
-              <div className="p-3 text-sm">
-                <div className="font-medium">{o.name}</div>
-                <div className="text-white/70">Qty {o.quantity} • ₹ {Number(o.total_price).toFixed(2)}</div>
-                <div className="text-white/60">{new Date(o.created_at).toLocaleString()}</div>
+            <div key={o.id} className="rounded-xl bg-white/5 p-6 border border-white/10 hover:border-brand-gold/30 transition-colors">
+              <div className="flex flex-col md:flex-row gap-4">
+                <img 
+                  src={o.image_url || 'https://placehold.co/600x600'} 
+                  className="w-full md:w-32 h-32 object-cover rounded-lg" 
+                  alt={o.product_name || 'Product'}
+                />
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <div className="font-semibold text-lg">{o.product_name || 'Order'}</div>
+                      <div className="text-sm text-white/70">Order ID: #{o.id}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xl font-bold text-brand-gold">₹ {Number(o.total_price).toFixed(2)}</div>
+                      <div className="text-xs text-white/60">{o.item_count || 1} item(s)</div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap gap-4 text-sm mb-3">
+                    <div>
+                      <span className="text-white/60">Status: </span>
+                      <span className={`font-semibold ${
+                        o.status === 'delivered' ? 'text-green-400' :
+                        o.status === 'shipped' ? 'text-blue-400' :
+                        o.status === 'confirmed' ? 'text-brand-gold' :
+                        'text-yellow-400'
+                      }`}>
+                        {o.status || 'Pending'}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-white/60">Payment: </span>
+                      <span className={`font-semibold ${
+                        o.payment_status === 'paid' ? 'text-green-400' : 'text-yellow-400'
+                      }`}>
+                        {o.payment_status || 'Pending'}
+                      </span>
+                    </div>
+                    {o.tracking_number && (
+                      <div>
+                        <span className="text-white/60">Tracking: </span>
+                        <span className="font-semibold">{o.tracking_number}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-xs text-white/50 mb-3">
+                    Placed on {new Date(o.created_at).toLocaleString()}
+                  </div>
+                  <div className="flex gap-2">
+                    <a
+                      href={`${base}/api/invoices/${o.id}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm transition-colors"
+                    >
+                      View Invoice
+                    </a>
+                    {o.tracking_number && (
+                      <div className="px-4 py-2 rounded-lg bg-brand-gold/20 text-brand-gold text-sm">
+                        Track: {o.tracking_number}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
-          {orders.length === 0 && <div className="text-white/70">No orders yet.</div>}
+          {orders.length === 0 && (
+            <div className="text-center py-12 text-white/70">
+              <ShoppingBag className="w-16 h-16 mx-auto mb-4 opacity-50" />
+              <div>No orders yet.</div>
+            </div>
+          )}
         </div>
       )}
 

@@ -12,7 +12,7 @@ export default function Cart() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
-  async function handleBuy() {
+  function handleBuy() {
     if (!user) {
       navigate('/login')
       return
@@ -23,35 +23,8 @@ export default function Cart() {
       return
     }
 
-    setLoading(true)
-    setError('')
-
-    try {
-      const base = import.meta.env.VITE_API_BASE
-      const token = localStorage.getItem('token')
-      
-      const response = await axios.post(
-        `${base}/api/user/me/orders`,
-        { items },
-        {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          withCredentials: true
-        }
-      )
-
-      // Clear cart on success
-      clear()
-      
-      // Show success message and redirect
-      alert(`Order placed successfully! Order ID: ${response.data.orders?.[0]?.id || 'N/A'}`)
-      navigate('/dashboard')
-    } catch (err) {
-      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to place order'
-      setError(errorMsg)
-      console.error('Order error:', err)
-    } finally {
-      setLoading(false)
-    }
+    // Redirect to checkout page
+    navigate('/checkout')
   }
 
   return (

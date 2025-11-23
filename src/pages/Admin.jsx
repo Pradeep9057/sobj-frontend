@@ -65,6 +65,8 @@ export default function Admin() {
   const [boxItems, setBoxItems] = useState([])
   const [editingItem, setEditingItem] = useState(null)
   const [showItemForm, setShowItemForm] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState(null)
+  const [orderStatusForm, setOrderStatusForm] = useState({ status: '', tracking_number: '', notes: '' })
   const [itemForm, setItemForm] = useState({
     sku: '',
     name: '',
@@ -98,12 +100,11 @@ export default function Admin() {
       }
       if (activeTab === 'users') {
         try {
-          // Fetch users if you have an endpoint, otherwise leave empty
-          // const { data } = await axios.get(`${base}/api/admin/users`, { withCredentials: true })
-          // setAllUsers(data)
-          setAllUsers([])
+          const { data } = await axiosInstance.get(`${base}/api/admin/users`)
+          setAllUsers(data)
         } catch (e) {
           console.error('Error loading users:', e)
+          setAllUsers([])
         }
       }
       if (activeTab === 'items') {
@@ -1086,32 +1087,66 @@ export default function Admin() {
                 <thead className="bg-white/5">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Order ID</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Product</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Quantity</th>
-                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Total Price</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Customer</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Items</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Total</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Payment</th>
                     <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/10">
                   {loading ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-10 text-center text-white/60">Loading orders...</td>
+                      <td colSpan={8} className="px-6 py-10 text-center text-white/60">Loading orders...</td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-10 text-center text-white/60">No orders yet</td>
+                      <td colSpan={8} className="px-6 py-10 text-center text-white/60">No orders yet</td>
                     </tr>
                   ) : (
                     orders.map((order) => (
                       <tr key={order.id} className="hover:bg-white/5">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">#{order.id}</td>
-                        <td className="px-6 py-4 text-sm">{order.product_name || 'N/A'}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">{order.quantity}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">#{order.id}</td>
+                        <td className="px-6 py-4 text-sm">
+                          <div>{order.user_name || 'Guest'}</div>
+                          <div className="text-xs text-white/60">{order.user_email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">{order.item_count || 1} item(s)</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-brand-gold">
                           ₹{Number(order.total_price || 0).toFixed(2)}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            order.status === 'delivered' ? 'bg-green-500/20 text-green-400' :
+                            order.status === 'shipped' ? 'bg-blue-500/20 text-blue-400' :
+                            order.status === 'confirmed' ? 'bg-brand-gold/20 text-brand-gold' :
+                            'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {order.status || 'Pending'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            order.payment_status === 'paid' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {order.payment_status || 'Pending'}
+                          </span>
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
                           {new Date(order.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setOrderStatusForm({ status: order.status || 'pending', tracking_number: order.tracking_number || '', notes: '' })
+                            }}
+                            className="text-brand-gold hover:text-yellow-400 text-sm"
+                          >
+                            Manage
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -1120,6 +1155,86 @@ export default function Admin() {
               </table>
             </div>
           </div>
+          
+          {/* Order Management Modal */}
+          {selectedOrder && (
+            <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+              <div className="bg-[#1a1a1a] rounded-2xl border border-white/10 p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-heading">Manage Order #{selectedOrder.id}</h3>
+                  <button
+                    onClick={() => setSelectedOrder(null)}
+                    className="text-white/60 hover:text-white text-2xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Order Status</label>
+                    <select
+                      value={orderStatusForm.status}
+                      onChange={e => setOrderStatusForm({...orderStatusForm, status: e.target.value})}
+                      className="w-full bg-white/10 p-3 rounded-lg border border-white/10"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="confirmed">Confirmed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="delivered">Delivered</option>
+                      <option value="cancelled">Cancelled</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Tracking Number</label>
+                    <input
+                      type="text"
+                      value={orderStatusForm.tracking_number}
+                      onChange={e => setOrderStatusForm({...orderStatusForm, tracking_number: e.target.value})}
+                      placeholder="Enter tracking number"
+                      className="w-full bg-white/10 p-3 rounded-lg border border-white/10"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold mb-2">Notes</label>
+                    <textarea
+                      value={orderStatusForm.notes}
+                      onChange={e => setOrderStatusForm({...orderStatusForm, notes: e.target.value})}
+                      placeholder="Optional notes"
+                      className="w-full bg-white/10 p-3 rounded-lg border border-white/10"
+                      rows="3"
+                    />
+                  </div>
+                  
+                  <div className="flex gap-3">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await axiosInstance.put(`${base}/api/admin/orders/${selectedOrder.id}/status`, orderStatusForm)
+                          alert('Order updated successfully!')
+                          setSelectedOrder(null)
+                          await loadData()
+                        } catch (err) {
+                          alert(err?.response?.data?.message || 'Failed to update order')
+                        }
+                      }}
+                      className="btn flex-1"
+                    >
+                      Update Order
+                    </button>
+                    <button
+                      onClick={() => setSelectedOrder(null)}
+                      className="px-6 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -1182,19 +1297,55 @@ export default function Admin() {
       {/* Users Tab */}
       {activeTab === 'users' && (
         <div className="space-y-6">
-          <h2 className="text-2xl font-heading">User Management</h2>
-          <div className="rounded-xl bg-white/5 border border-white/10 p-6">
-            <p className="text-white/60 mb-4">
-              User management functionality. To enable this feature, add a user management endpoint to your backend.
-            </p>
-            <div className="text-sm text-white/40">
-              <p>Currently showing {allUsers.length} users</p>
-              <p className="mt-2">To implement:</p>
-              <ul className="list-disc list-inside mt-2 space-y-1">
-                <li>Create GET /api/admin/users endpoint</li>
-                <li>Create PUT /api/admin/users/:id endpoint for role updates</li>
-                <li>Create DELETE /api/admin/users/:id endpoint</li>
-              </ul>
+          <h2 className="text-2xl font-heading">Customer Management</h2>
+          <div className="rounded-xl bg-white/5 border border-white/10 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-white/5">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">ID</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Name</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Orders</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Total Spent</th>
+                    <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wider">Joined</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/10">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-10 text-center text-white/60">Loading users...</td>
+                    </tr>
+                  ) : allUsers.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-10 text-center text-white/60">No users found</td>
+                    </tr>
+                  ) : (
+                    allUsers.map((user) => (
+                      <tr key={user.id} className="hover:bg-white/5">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">#{user.id}</td>
+                        <td className="px-6 py-4 text-sm font-semibold">{user.name}</td>
+                        <td className="px-6 py-4 text-sm">{user.email}</td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                            user.role === 'admin' ? 'bg-brand-gold/20 text-brand-gold' : 'bg-white/10 text-white/70'
+                          }`}>
+                            {user.role}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">{user.order_count || 0}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-brand-gold">
+                          ₹{Number(user.total_spent || 0).toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-white/60">
+                          {new Date(user.created_at).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
