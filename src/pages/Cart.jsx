@@ -1,13 +1,57 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useCart } from '../state/CartContext.jsx'
+import { useAuth } from '../state/AuthContext.jsx'
 import { ShoppingBag, Trash2, Plus, Minus, CreditCard } from 'lucide-react'
+import axios from 'axios'
 
 export default function Cart() {
-  const { items, setQty, remove, totals, refreshPrices } = useCart()
+  const { items, setQty, remove, totals, refreshPrices, clear } = useCart()
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
-  function handleBuy() {
-    alert('Buy functionality - This would redirect to checkout/payment page')
-    // In production, this would navigate to checkout
-    // navigate('/checkout')
+  async function handleBuy() {
+    if (!user) {
+      navigate('/login')
+      return
+    }
+
+    if (items.length === 0) {
+      setError('Your cart is empty')
+      return
+    }
+
+    setLoading(true)
+    setError('')
+
+    try {
+      const base = import.meta.env.VITE_API_BASE
+      const token = localStorage.getItem('token')
+      
+      const response = await axios.post(
+        `${base}/api/user/me/orders`,
+        { items },
+        {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          withCredentials: true
+        }
+      )
+
+      // Clear cart on success
+      clear()
+      
+      // Show success message and redirect
+      alert(`Order placed successfully! Order ID: ${response.data.orders?.[0]?.id || 'N/A'}`)
+      navigate('/dashboard')
+    } catch (err) {
+      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to place order'
+      setError(errorMsg)
+      console.error('Order error:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -100,12 +144,18 @@ export default function Cart() {
                 <span className="text-2xl font-bold text-brand-gold">₹ {totals.total.toFixed(2)}</span>
               </div>
             </div>
+            {error && (
+              <div className="mb-3 p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 text-sm">
+                {error}
+              </div>
+            )}
             <button 
               onClick={handleBuy}
-              className="w-full btn flex items-center justify-center gap-2 mb-3 text-lg py-4"
+              disabled={loading || items.length === 0}
+              className="w-full btn flex items-center justify-center gap-2 mb-3 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CreditCard className="w-5 h-5" />
-              Buy Now
+              {loading ? 'Placing Order...' : 'Buy Now'}
             </button>
             <button 
               className="w-full px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-sm"

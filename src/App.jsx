@@ -128,7 +128,10 @@ function Navbar() {
               )}
             </div>
           ) : (
-            <NavLink to="/login">Login</NavLink>
+            <div className="flex items-center gap-3">
+              <NavLink to="/login" className="hover:text-brand-gold transition-colors">Login</NavLink>
+              <NavLink to="/signup" className="px-4 py-2 rounded-lg bg-brand-gold text-black font-semibold hover:bg-yellow-400 transition-colors">Sign Up</NavLink>
+            </div>
           )}
         </div>
       </div>
@@ -164,6 +167,7 @@ export default function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
     </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../state/AuthContext.jsx'
 
 export default function Signup() {
   const [name, setName] = useState('')
@@ -11,6 +12,7 @@ export default function Signup() {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { refresh } = useAuth()
 
   async function onSubmit(e) {
     e.preventDefault()

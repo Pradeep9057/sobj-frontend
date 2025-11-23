@@ -1,5 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import axios from 'axios'
+import axiosInstance from '../utils/axios.js'
 import { 
   Package, 
   DollarSign, 
@@ -92,7 +93,7 @@ export default function Admin() {
         setMetalPrices(data)
       }
       if (activeTab === 'orders') {
-        const { data } = await axios.get(`${base}/api/admin/orders`, { withCredentials: true })
+        const { data } = await axiosInstance.get(`${base}/api/admin/orders`)
         setOrders(data)
       }
       if (activeTab === 'users') {
@@ -216,7 +217,7 @@ export default function Admin() {
       if (file) {
         const formData = new FormData()
         formData.append('file', file)
-        const { data } = await axios.post(`${base}/api/uploads/image`, formData, { withCredentials: true })
+        const { data } = await axiosInstance.post(`${base}/api/uploads/image`, formData)
         imageUrl = data.url
       }
 
@@ -234,10 +235,10 @@ export default function Admin() {
       let savedProduct
       
       if (editingProduct && editingProduct.id) {
-        const { data } = await axios.put(`${base}/api/products/${editingProduct.id}`, productData, { withCredentials: true })
+        const { data } = await axiosInstance.put(`${base}/api/products/${editingProduct.id}`, productData)
         savedProduct = data
       } else {
-        const { data } = await axios.post(`${base}/api/products`, productData, { withCredentials: true })
+        const { data } = await axiosInstance.post(`${base}/api/products`, productData)
         savedProduct = data
         // After creating, set it as editingProduct so ImageManager shows
         setEditingProduct(savedProduct)
@@ -311,7 +312,7 @@ export default function Admin() {
   async function handleDelete(id) {
     if (!confirm('Are you sure you want to delete this product?')) return
     try {
-      await axios.delete(`${base}/api/products/${id}`, { withCredentials: true })
+      await axiosInstance.delete(`${base}/api/products/${id}`)
       loadData()
     } catch (e) {
       alert('Error deleting product')
@@ -320,7 +321,7 @@ export default function Admin() {
 
   async function handleMetalPriceUpdate(metal, rate) {
     try {
-      await axios.post(`${base}/api/prices/update`, { metal, rate_per_gram: Number(rate) }, { withCredentials: true })
+      await axiosInstance.post(`${base}/api/prices/update`, { metal, rate_per_gram: Number(rate) })
       loadData()
     } catch (e) {
       alert('Error updating metal price')
@@ -530,7 +531,7 @@ export default function Admin() {
                       try {
                         await Promise.all(
                           selectedProducts.map(id => 
-                            axios.delete(`${base}/api/products/${id}`, { withCredentials: true })
+                            axiosInstance.delete(`${base}/api/products/${id}`)
                           )
                         )
                         setSelectedProducts([])
@@ -1001,7 +1002,7 @@ export default function Admin() {
                     setLoading(true)
                     // Force refresh from API
                     const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
-                    await axios.post(`${base}/api/prices/refresh`, {}, { withCredentials: true })
+                    await axiosInstance.post(`${base}/api/prices/refresh`, {})
                     await loadData()
                     alert('Prices refreshed successfully!')
                   } catch (e) {
@@ -1254,10 +1255,10 @@ export default function Admin() {
                     }
 
                     if (editingItem && editingItem.id) {
-                      await axios.put(`${base}/api/items/${editingItem.id}`, itemData, { withCredentials: true })
+                      await axiosInstance.put(`${base}/api/items/${editingItem.id}`, itemData)
                       alert('Item updated successfully!')
                     } else {
-                      await axios.post(`${base}/api/items`, itemData, { withCredentials: true })
+                      await axiosInstance.post(`${base}/api/items`, itemData)
                       alert('Item created successfully!')
                     }
 
@@ -1440,7 +1441,7 @@ export default function Admin() {
                               onClick={async () => {
                                 if (confirm(`Are you sure you want to delete "${item.name}" (${item.sku})?`)) {
                                   try {
-                                    await axios.delete(`${base}/api/items/${item.id}`, { withCredentials: true })
+                                    await axiosInstance.delete(`${base}/api/items/${item.id}`)
                                     alert('Item deleted successfully!')
                                     await loadData()
                                   } catch (e) {
@@ -1626,7 +1627,7 @@ function ImageManagementTab() {
         try {
           const formData = new FormData()
           formData.append('file', uploadFile)
-          const { data } = await axios.post(`${base}/api/uploads/image`, formData, { withCredentials: true })
+          const { data } = await axiosInstance.post(`${base}/api/uploads/image`, formData)
           imageUrl = data.url
         } catch (uploadError) {
           const errorMsg = uploadError.response?.data?.message || uploadError.message
@@ -1691,7 +1692,7 @@ function ImageManagementTab() {
     if (!confirm('Are you sure you want to delete this image?')) return
     setLoading(true)
     try {
-      await axios.delete(`${base}/api/images/website/${imageId}`, { withCredentials: true })
+      await axiosInstance.delete(`${base}/api/images/website/${imageId}`)
       await loadImages()
       alert('Image deleted successfully!')
     } catch (e) {
