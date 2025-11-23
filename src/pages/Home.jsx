@@ -212,14 +212,14 @@ export default function Home() {
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
           {[
-            { img: 'https://images.pexels.com/photos/853663/pexels-photo-853663.jpeg', title: 'Gold Collection' },
-            { img: 'https://images.pexels.com/photos/1457800/pexels-photo-1457800.jpeg', title: 'Silver Elegance' },
-            { img: 'https://images.pexels.com/photos/863963/pexels-photo-863963.jpeg', title: 'Designer Rings' },
-            { img: 'https://images.pexels.com/photos/1453005/pexels-photo-1453005.jpeg', title: 'Handcrafted' },
-            { img: 'https://images.pexels.com/photos/267301/pexels-photo-267301.jpeg', title: 'Premium Quality' },
-            { img: 'https://images.pexels.com/photos/853663/pexels-photo-853663.jpeg', title: 'Elegant Designs' },
-            { img: 'https://images.pexels.com/photos/1457800/pexels-photo-1457800.jpeg', title: 'Timeless Pieces' },
-            { img: 'https://images.pexels.com/photos/863963/pexels-photo-863963.jpeg', title: 'Heritage Craft' }
+            { img: 'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=800&q=80', title: 'Gold Collection' },
+            { img: 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&q=80', title: 'Silver Elegance' },
+            { img: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=800&q=80', title: 'Designer Rings' },
+            { img: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80', title: 'Handcrafted' },
+            { img: 'https://images.unsplash.com/photo-1611955167811-4711904bb9f0?w=800&q=80', title: 'Premium Quality' },
+            { img: 'https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?w=800&q=80', title: 'Elegant Designs' },
+            { img: 'https://images.unsplash.com/photo-1611591437281-460bfbe1220a?w=800&q=80', title: 'Timeless Pieces' },
+            { img: 'https://images.unsplash.com/photo-1603561591411-07134e71a2a9?w=800&q=80', title: 'Heritage Craft' }
           ].map((item, index) => (
             <motion.div
               key={index}
@@ -450,7 +450,7 @@ export default function Home() {
           >
             <div className="absolute inset-0 bg-gradient-to-br from-brand-gold/20 to-transparent rounded-3xl blur-2xl group-hover:blur-3xl transition-all" />
             <img 
-              src="https://images.pexels.com/photos/853663/pexels-photo-853663.jpeg" 
+              src="https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=1200&q=80" 
               alt="Benefits" 
               className="relative rounded-3xl shadow-2xl object-cover w-full aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500"
             />
@@ -530,7 +530,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-to-br from-brand-gold/20 to-transparent rounded-3xl blur-2xl group-hover:blur-3xl transition-all" />
             <img 
               className="relative rounded-2xl md:rounded-3xl shadow-2xl object-cover w-full aspect-[4/3] group-hover:scale-[1.02] transition-transform duration-500" 
-              src="https://images.pexels.com/photos/1453005/pexels-photo-1453005.jpeg" 
+              src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=1200&q=80" 
               alt="About Sonaura" 
             />
             <div className="absolute -bottom-4 -right-4 w-24 h-24 md:w-32 md:h-32 bg-brand-gold rounded-2xl opacity-20 blur-2xl" />
