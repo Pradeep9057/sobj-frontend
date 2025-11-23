@@ -8,47 +8,31 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   async function refresh() {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      setUser(null)
-      setLoading(false)
-      return
-    }
-
     try {
-      const base = import.meta.env.VITE_API_BASE
-
-      const { data } = await axios.get(`${base}/api/auth/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+      const token = localStorage.getItem('token')
+      const headers = token ? { Authorization: `Bearer ${token}` } : {}
+      const { data } = await axios.get(`${base}/api/auth/profile`, { 
+        withCredentials: true,
+        headers 
       })
-
       setUser(data)
-    } catch (err) {
-      console.error("Auth refresh failed:", err)
+    } catch {
       setUser(null)
     } finally {
       setLoading(false)
     }
   }
 
-  function logout() {
-    localStorage.removeItem('token')
-    setUser(null)
-  }
-
-  useEffect(() => {
-    refresh()
-  }, [])
+  useEffect(() => { refresh() }, [])
 
   return (
-    <AuthCtx.Provider value={{ user, setUser, loading, refresh, logout }}>
+    <AuthCtx.Provider value={{ user, setUser, loading, refresh }}>
       {children}
     </AuthCtx.Provider>
   )
 }
 
-export function useAuth() {
-  return useContext(AuthCtx)
-}
+export function useAuth() { return useContext(AuthCtx) }
+
+
