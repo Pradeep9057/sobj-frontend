@@ -299,7 +299,7 @@ export default function Dashboard() {
                   </div>
                   <div className="flex gap-2">
                     <a
-                      href={`${base}/api/invoices/${o.id}`}
+                      href={`${base}/api/invoices/${o.id}?token=${localStorage.getItem('token')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-4 py-2 rounded-lg bg-brand-gold/20 hover:bg-brand-gold/30 border border-brand-gold/30 text-brand-gold text-sm transition-colors font-semibold"
@@ -307,7 +307,7 @@ export default function Dashboard() {
                       📄 View Invoice
                     </a>
                     <a
-                      href={`${base}/api/invoices/${o.id}?print=true`}
+                      href={`${base}/api/invoices/${o.id}?print=true&token=${localStorage.getItem('token')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="px-4 py-2 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-sm transition-colors"
