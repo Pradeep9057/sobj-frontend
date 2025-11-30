@@ -23,7 +23,7 @@ export default function Products() {
   const [quickViewProduct, setQuickViewProduct] = useState(null)
   const [showQuickView, setShowQuickView] = useState(false)
   const { user } = useAuth()
-  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 
   // Get unique categories from products
   const categories = useMemo(() => {

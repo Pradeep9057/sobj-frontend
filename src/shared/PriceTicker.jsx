@@ -12,7 +12,7 @@ export default function PriceTicker() {
   async function load(manualRefresh = false) {
     try {
       setLoading(true)
-      const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
       const { data } = await axios.get(`${base}/api/prices`)
       setPrices(data)
       

@@ -1,4 +1,4 @@
-import { Routes, Route, NavLink, useNavigate, Navigate } from 'react-router-dom'
+import { Routes, Route, NavLink, useNavigate } from 'react-router-dom'
 import { useState, useRef, useEffect } from 'react'
 import { User, LogOut, ShoppingBag, Heart, MapPin, KeyRound, ChevronDown, Shield } from 'lucide-react'
 import { useAuth } from './state/AuthContext.jsx'
@@ -9,7 +9,6 @@ import Home from './pages/Home.jsx'
 import Products from './pages/Products.jsx'
 import ProductDetail from './pages/ProductDetail.jsx'
 import Cart from './pages/Cart.jsx'
-import Checkout from './pages/Checkout.jsx'
 import Login from './pages/Login.jsx'
 import Signup from './pages/Signup.jsx'
 import Dashboard from './pages/Dashboard.jsx'
@@ -45,7 +44,7 @@ function Navbar() {
   }, [])
 
   async function handleLogout() {
-    const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+    const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
     try {
       await axios.post(`${base}/api/auth/logout`, {}, { withCredentials: true })
     } catch {}
@@ -129,10 +128,7 @@ function Navbar() {
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <NavLink to="/login" className="hover:text-brand-gold transition-colors">Login</NavLink>
-              <NavLink to="/signup" className="px-4 py-2 rounded-lg bg-brand-gold text-black font-semibold hover:bg-yellow-400 transition-colors">Sign Up</NavLink>
-            </div>
+            <NavLink to="/login">Login</NavLink>
           )}
         </div>
       </div>
@@ -164,12 +160,10 @@ export default function App() {
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
-        <Route path="/checkout" element={<ProtectedRoute><Checkout /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
     </div>

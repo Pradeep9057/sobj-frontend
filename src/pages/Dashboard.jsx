@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import axiosInstance from '../utils/axios.js'
+import axios from 'axios'
 import { User, Mail, Shield, Calendar, ShoppingBag, Heart, MapPin, KeyRound, Sparkles } from 'lucide-react'
 
 export default function Dashboard() {
-  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
   const [tab, setTab] = useState('profile')
   const [profile, setProfile] = useState(null)
   const [orders, setOrders] = useState([])
@@ -22,41 +22,33 @@ export default function Dashboard() {
   }
 
   useEffect(() => {
-    axiosInstance.get(`${base}/api/user/me`).then(r => setProfile(r.data)).catch(err => console.error('Profile error:', err))
-    axiosInstance.get(`${base}/api/user/me/orders`).then(r => setOrders(r.data)).catch(err => console.error('Orders error:', err))
-    axiosInstance.get(`${base}/api/user/me/wishlist`).then(r => setWishlist(r.data)).catch(err => console.error('Wishlist error:', err))
-    axiosInstance.get(`${base}/api/user/me/addresses`).then(r => setAddresses(r.data)).catch(err => console.error('Addresses error:', err))
-    
-    // Check for order success message
-    const params = new URLSearchParams(window.location.search)
-    if (params.get('success') === 'true' && params.get('order')) {
-      alert(`Order #${params.get('order')} placed successfully!`)
-      // Clean URL
-      window.history.replaceState({}, '', '/dashboard')
-    }
-  }, [base])
+    axios.get(`${base}/api/user/me`, { withCredentials: true }).then(r => setProfile(r.data))
+    axios.get(`${base}/api/user/me/orders`, { withCredentials: true }).then(r => setOrders(r.data))
+    axios.get(`${base}/api/user/me/wishlist`, { withCredentials: true }).then(r => setWishlist(r.data))
+    axios.get(`${base}/api/user/me/addresses`, { withCredentials: true }).then(r => setAddresses(r.data))
+  }, [])
 
   function removeFromWishlist(id) {
-    axiosInstance.delete(`${base}/api/user/me/wishlist/${id}`).then(() => {
+    axios.delete(`${base}/api/user/me/wishlist/${id}`, { withCredentials: true }).then(() => {
       setWishlist(wishlist.filter(w => w.product_id !== Number(id)))
-    }).catch(err => alert(err?.response?.data?.message || 'Failed to remove'))
+    })
   }
 
   function saveAddress(e) {
     e.preventDefault()
-    axiosInstance.post(`${base}/api/user/me/addresses`, addrForm).then(() => {
+    axios.post(`${base}/api/user/me/addresses`, addrForm, { withCredentials: true }).then(() => {
       setAddrForm({ full_name: '', phone: '', line1: '', line2: '', city: '', state: '', postal_code: '', country: 'India', is_default: false })
-      return axiosInstance.get(`${base}/api/user/me/addresses`)
-    }).then(r => setAddresses(r.data)).catch(err => alert(err?.response?.data?.message || 'Failed to save address'))
+      return axios.get(`${base}/api/user/me/addresses`, { withCredentials: true })
+    }).then(r => setAddresses(r.data))
   }
 
   function deleteAddress(id) {
-    axiosInstance.delete(`${base}/api/user/me/addresses/${id}`).then(() => setAddresses(addresses.filter(a => a.id !== id))).catch(err => alert(err?.response?.data?.message || 'Failed to delete'))
+    axios.delete(`${base}/api/user/me/addresses/${id}`, { withCredentials: true }).then(() => setAddresses(addresses.filter(a => a.id !== id)))
   }
 
   function changePassword(e) {
     e.preventDefault()
-    axiosInstance.post(`${base}/api/user/me/change-password`, pw).then(() => {
+    axios.post(`${base}/api/user/me/change-password`, pw, { withCredentials: true }).then(() => {
       alert('Password changed')
       setPw({ oldPassword: '', newPassword: '' })
     }).catch(err => alert(err?.response?.data?.message || 'Failed'))
@@ -247,8 +239,9 @@ export default function Dashboard() {
       )}
 
       {tab === 'orders' && (
-        <div className="space-y-4">
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4">
           {orders.map(o => (
+<<<<<<< HEAD
             <div key={o.id} className="rounded-xl bg-white/5 p-6 border border-white/10 hover:border-brand-gold/30 transition-colors">
               <div className="flex flex-col md:flex-row gap-4">
                 <img 
@@ -321,15 +314,18 @@ export default function Dashboard() {
                     )}
                   </div>
                 </div>
+=======
+            <div key={o.id} className="rounded-xl overflow-hidden bg-white/5">
+              <img src={o.image_url || 'https://placehold.co/600x600'} className="w-full aspect-video object-cover" />
+              <div className="p-3 text-sm">
+                <div className="font-medium">{o.name}</div>
+                <div className="text-white/70">Qty {o.quantity} • ₹ {Number(o.total_price).toFixed(2)}</div>
+                <div className="text-white/60">{new Date(o.created_at).toLocaleString()}</div>
+>>>>>>> 3aac940a8df3a1074f2a4b5a1561e74d72c3e79c
               </div>
             </div>
           ))}
-          {orders.length === 0 && (
-            <div className="text-center py-12 text-white/70">
-              <ShoppingBag className="w-16 h-16 mx-auto mb-4 opacity-50" />
-              <div>No orders yet.</div>
-            </div>
-          )}
+          {orders.length === 0 && <div className="text-white/70">No orders yet.</div>}
         </div>
       )}
 

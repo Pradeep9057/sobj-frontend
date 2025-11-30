@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../state/AuthContext.jsx'
 
 export default function Signup() {
   const [name, setName] = useState('')
@@ -12,12 +11,12 @@ export default function Signup() {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const { refresh } = useAuth()
 
   async function onSubmit(e) {
     e.preventDefault()
     setLoading(true)
     try {
+<<<<<<< HEAD
       if (!name || !email || !password) {
         throw new Error('All fields are required')
       }
@@ -27,6 +26,9 @@ export default function Signup() {
       }
 
       const base = import.meta.env.VITE_API_BASE
+=======
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+>>>>>>> 3aac940a8df3a1074f2a4b5a1561e74d72c3e79c
       await axios.post(`${base}/api/auth/register`, { name, email, password }, { withCredentials: true })
       setMsg('Registered! Check your email for the OTP.')
       setStep('otp')
@@ -42,6 +44,7 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     try {
+<<<<<<< HEAD
       if (!code) {
         throw new Error('Please enter the OTP')
       }
@@ -57,6 +60,10 @@ export default function Signup() {
       // Refresh auth context
       await refresh()
       
+=======
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+      await axios.post(`${base}/api/auth/verify-otp`, { email, code }, { withCredentials: true })
+>>>>>>> 3aac940a8df3a1074f2a4b5a1561e74d72c3e79c
       setMsg('Verified! Redirecting to dashboard...')
       setTimeout(() => navigate('/dashboard'), 500)
     } catch (e) {

@@ -14,14 +14,14 @@ export function CartProvider({ children }) {
   useEffect(() => { localStorage.setItem('cart', JSON.stringify(items)) }, [items])
 
   async function refreshPrices() {
-    const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+    const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
     const { data } = await axios.get(`${base}/api/prices`)
     setPrices(data)
   }
 
   useEffect(() => { refreshPrices() }, [])
 
-  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 
   // Helper to fetch & return product details from DB
   async function fetchProductById(id) {
