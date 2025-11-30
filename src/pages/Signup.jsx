@@ -18,13 +18,20 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     try {
-      const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+      if (!name || !email || !password) {
+        throw new Error('All fields are required')
+      }
+      
+      if (password.length < 6) {
+        throw new Error('Password must be at least 6 characters')
+      }
+
+      const base = import.meta.env.VITE_API_BASE
       await axios.post(`${base}/api/auth/register`, { name, email, password }, { withCredentials: true })
-      setMsg('Registered! Please enter the OTP sent to your email')
+      setMsg('Registered! Check your email for the OTP.')
       setStep('otp')
     } catch (e) {
       const serverMsg = e?.response?.data?.message || e?.message || 'Registration failed'
-      // eslint-disable-next-line no-console
       console.error('Signup error:', e)
       setMsg(serverMsg)
     }
@@ -35,7 +42,11 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     try {
-      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+      if (!code) {
+        throw new Error('Please enter the OTP')
+      }
+
+      const base = import.meta.env.VITE_API_BASE
       const res = await axios.post(`${base}/api/auth/verify-otp`, { email, code }, { withCredentials: true })
       
       // Save token in localStorage
@@ -50,7 +61,6 @@ export default function Signup() {
       setTimeout(() => navigate('/dashboard'), 500)
     } catch (e) {
       const serverMsg = e?.response?.data?.message || 'Invalid or expired code'
-      // eslint-disable-next-line no-console
       console.error('OTP verify error:', e)
       setMsg(serverMsg)
     }

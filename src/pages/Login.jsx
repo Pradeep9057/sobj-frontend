@@ -19,6 +19,10 @@ export default function Login() {
     setMsg('')
 
     try {
+      if (!email || !password) {
+        throw new Error('Email and password are required')
+      }
+
       const base = import.meta.env.VITE_API_BASE
 
       const res = await axios.post(
@@ -28,7 +32,7 @@ export default function Login() {
       )
 
       if (res.data.otp_sent) {
-        setMsg('OTP sent to your email. Please enter the code.')
+        setMsg('OTP sent to your email. Please check your inbox and enter the code.')
         setStep('otp')
       } else {
         setMsg("Login failed: OTP not sent")
@@ -36,6 +40,7 @@ export default function Login() {
     } catch (err) {
       const serverMsg = err?.response?.data?.message || err?.message || 'Invalid credentials'
       setMsg(serverMsg)
+      console.error('Login error:', err)
     } finally {
       setLoading(false)
     }
@@ -47,6 +52,10 @@ export default function Login() {
     setMsg('')
 
     try {
+      if (!code) {
+        throw new Error('Please enter the OTP')
+      }
+
       const base = import.meta.env.VITE_API_BASE
 
       const res = await axios.post(
@@ -70,6 +79,7 @@ export default function Login() {
     } catch (err) {
       const serverMsg = err?.response?.data?.message || err?.message || 'Invalid or expired code'
       setMsg(serverMsg)
+      console.error('OTP verification error:', err)
     } finally {
       setLoading(false)
     }
