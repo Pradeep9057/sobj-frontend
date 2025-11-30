@@ -1,30 +1,13 @@
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useCart } from '../state/CartContext.jsx'
-import { useAuth } from '../state/AuthContext.jsx'
 import { ShoppingBag, Trash2, Plus, Minus, CreditCard } from 'lucide-react'
-import axios from 'axios'
 
 export default function Cart() {
-  const { items, setQty, remove, totals, refreshPrices, clear } = useCart()
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const { items, setQty, remove, totals, refreshPrices } = useCart()
 
   function handleBuy() {
-    if (!user) {
-      navigate('/login')
-      return
-    }
-
-    if (items.length === 0) {
-      setError('Your cart is empty')
-      return
-    }
-
-    // Redirect to checkout page
-    navigate('/checkout')
+    alert('Buy functionality - This would redirect to checkout/payment page')
+    // In production, this would navigate to checkout
+    // navigate('/checkout')
   }
 
   return (
@@ -117,18 +100,12 @@ export default function Cart() {
                 <span className="text-2xl font-bold text-brand-gold">₹ {totals.total.toFixed(2)}</span>
               </div>
             </div>
-            {error && (
-              <div className="mb-3 p-3 rounded-lg bg-red-500/20 border border-red-500/50 text-red-400 text-sm">
-                {error}
-              </div>
-            )}
             <button 
               onClick={handleBuy}
-              disabled={loading || items.length === 0}
-              className="w-full btn flex items-center justify-center gap-2 mb-3 text-lg py-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full btn flex items-center justify-center gap-2 mb-3 text-lg py-4"
             >
               <CreditCard className="w-5 h-5" />
-              {loading ? 'Placing Order...' : 'Buy Now'}
+              Buy Now
             </button>
             <button 
               className="w-full px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors text-sm"

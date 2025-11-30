@@ -9,7 +9,7 @@ export default function QuickView({ product, isOpen, onClose }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isZoomed, setIsZoomed] = useState(false)
   const { user } = useAuth()
-  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 
   // Get product images from database - use images array if available, otherwise fallback to image_url
   const productImages = (() => {

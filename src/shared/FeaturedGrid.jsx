@@ -7,22 +7,14 @@ import QuickView from './QuickView.jsx'
 
 export default function FeaturedGrid() {
   const [products, setProducts] = useState([])
-  const [prices, setPrices] = useState([])
   const [quickViewProduct, setQuickViewProduct] = useState(null)
   const [showQuickView, setShowQuickView] = useState(false)
-  const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
+  const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
 
   useEffect(() => {
     async function load() {
       try {
-        const [productsRes, pricesRes] = await Promise.all([
-          axios.get(`${base}/api/products`),
-          axios.get(`${base}/api/prices`)
-        ])
-        
-        const data = productsRes.data
-        setPrices(pricesRes.data)
-        
+        const { data } = await axios.get(`${base}/api/products`)
         // Filter out products with ₹0 price and get first 4 products with valid prices
         const productsWithPrice = data.filter(p => {
           // Calculate approximate price - products with weight and metal_type should have price > 0
@@ -40,50 +32,7 @@ export default function FeaturedGrid() {
       }
     }
     load()
-  }, [base])
-
-  // Calculate price for a product
-  const calculatePrice = (product) => {
-    if (product.price && Number(product.price) > 0) {
-      return Number(product.price)
-    }
-    
-    if (!product.weight || !product.metal_type || !prices.length) {
-      return null
-    }
-
-    const purityKey = product.purity || (product.metal_type === 'gold' ? '22K' : '999')
-    const pickGoldKey = purityKey === '24K' ? 'gold_24k' : 'gold_22k'
-    const metalKey = product.metal_type === 'gold' ? pickGoldKey : 'silver'
-    const entry = prices.find(p => p.metal === metalKey) || prices[0]
-    const metalRate = entry ? Number(entry.rate_per_gram) : 0
-    const weight = Number(product.weight) || 0
-    const basePrice = metalRate * weight
-
-    // Calculate making charges
-    let makingCharges = 0
-    const makingChargesType = product.making_charges_type || 'fixed'
-    const makingChargesValue = Number(product.making_charges_value) || 0
-
-    if (makingChargesType === 'percentage') {
-      makingCharges = (makingChargesValue / 100) * basePrice
-    } else if (makingChargesType === 'per_gram') {
-      makingCharges = makingChargesValue * weight
-    } else {
-      makingCharges = makingChargesValue || Math.max(500, weight * 50)
-    }
-
-    // Subtotal = base + making
-    const subtotal = basePrice + makingCharges
-
-    // GST (3%)
-    const gst = subtotal * 0.03
-
-    // Total = subtotal + GST
-    const total = subtotal + gst
-
-    return Math.round(total)
-  }
+  }, [])
 
   const handleQuickView = (e, product) => {
     e.preventDefault()
@@ -159,17 +108,15 @@ export default function FeaturedGrid() {
                 )}
                 
                 {/* Price */}
-                {(() => {
-                  const calculatedPrice = calculatePrice(product)
-                  if (calculatedPrice !== null && calculatedPrice > 0) {
-                    return (
-                      <div className="mt-2 md:mt-3 text-brand-gold font-semibold text-sm md:text-base">
-                        Starting from ₹{calculatedPrice.toLocaleString()}
-                      </div>
-                    )
-                  }
-                  return null
-                })()}
+                {product.price && Number(product.price) > 0 ? (
+                  <div className="mt-2 md:mt-3 text-brand-gold font-semibold text-sm md:text-base">
+                    Starting from ₹{Number(product.price).toLocaleString()}
+                  </div>
+                ) : (product.weight && product.metal_type) ? (
+                  <div className="mt-2 md:mt-3 text-brand-gold font-semibold text-sm md:text-base">
+                    Price calculated on selection
+                  </div>
+                ) : null}
               </div>
 
               {/* Shine Effect */}

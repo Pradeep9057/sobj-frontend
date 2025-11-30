@@ -9,13 +9,8 @@ export function AuthProvider({ children }) {
 
   async function refresh() {
     try {
-      const base = import.meta.env.VITE_API_BASE //|| 'http://localhost:5000'
-      const token = localStorage.getItem('token')
-      const headers = token ? { Authorization: `Bearer ${token}` } : {}
-      const { data } = await axios.get(`${base}/api/auth/profile`, { 
-        withCredentials: true,
-        headers 
-      })
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+      const { data } = await axios.get(`${base}/api/auth/profile`, { withCredentials: true })
       setUser(data)
     } catch {
       setUser(null)

@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
-import { useAuth } from '../state/AuthContext.jsx'
 
 export default function Signup() {
   const [name, setName] = useState('')
@@ -12,26 +11,18 @@ export default function Signup() {
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
-  const { refresh } = useAuth()
 
   async function onSubmit(e) {
     e.preventDefault()
     setLoading(true)
     try {
-      if (!name || !email || !password) {
-        throw new Error('All fields are required')
-      }
-      
-      if (password.length < 6) {
-        throw new Error('Password must be at least 6 characters')
-      }
-
-      const base = import.meta.env.VITE_API_BASE
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
       await axios.post(`${base}/api/auth/register`, { name, email, password }, { withCredentials: true })
-      setMsg('Registered! Check your email for the OTP.')
+      setMsg('Registered! Please enter the OTP sent to your email')
       setStep('otp')
     } catch (e) {
       const serverMsg = e?.response?.data?.message || e?.message || 'Registration failed'
+      // eslint-disable-next-line no-console
       console.error('Signup error:', e)
       setMsg(serverMsg)
     }
@@ -42,25 +33,13 @@ export default function Signup() {
     e.preventDefault()
     setLoading(true)
     try {
-      if (!code) {
-        throw new Error('Please enter the OTP')
-      }
-
-      const base = import.meta.env.VITE_API_BASE
-      const res = await axios.post(`${base}/api/auth/verify-otp`, { email, code }, { withCredentials: true })
-      
-      // Save token in localStorage
-      if (res.data.token) {
-        localStorage.setItem("token", res.data.token)
-      }
-      
-      // Refresh auth context
-      await refresh()
-      
+      const base = import.meta.env.VITE_API_BASE || 'http://localhost:5000'
+      await axios.post(`${base}/api/auth/verify-otp`, { email, code }, { withCredentials: true })
       setMsg('Verified! Redirecting to dashboard...')
       setTimeout(() => navigate('/dashboard'), 500)
     } catch (e) {
       const serverMsg = e?.response?.data?.message || 'Invalid or expired code'
+      // eslint-disable-next-line no-console
       console.error('OTP verify error:', e)
       setMsg(serverMsg)
     }
